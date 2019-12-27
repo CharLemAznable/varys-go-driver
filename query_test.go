@@ -55,7 +55,7 @@ func TestAppAuthorizerToken(t *testing.T) {
     ConfigInstance = NewConfig()
 
     ConfigInstance.Address = ""
-    _, err := AppToken("codeName")
+    _, err := AppAuthorizerToken("codeName", "authorizerAppId")
     if nil == err || "未配置Varys.Address" != err.Error() {
         t.Errorf("Should has error: 未配置Varys.Address")
     }
@@ -100,7 +100,7 @@ func TestCorpToken(t *testing.T) {
     ConfigInstance = NewConfig()
 
     ConfigInstance.Address = ""
-    _, err := AppToken("codeName")
+    _, err := CorpToken("codeName")
     if nil == err || "未配置Varys.Address" != err.Error() {
         t.Errorf("Should has error: 未配置Varys.Address")
     }
@@ -144,7 +144,7 @@ func TestCorpAuthorizerToken(t *testing.T) {
     ConfigInstance = NewConfig()
 
     ConfigInstance.Address = ""
-    _, err := AppToken("codeName")
+    _, err := CorpAuthorizerToken("codeName", "corpId")
     if nil == err || "未配置Varys.Address" != err.Error() {
         t.Errorf("Should has error: 未配置Varys.Address")
     }

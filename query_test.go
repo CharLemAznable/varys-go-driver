@@ -2,185 +2,259 @@ package varys
 
 import (
     "github.com/CharLemAznable/gokits"
+    "github.com/stretchr/testify/assert"
     "net/http"
     "net/http/httptest"
     "testing"
 )
 
-func TestAppToken(t *testing.T) {
+func TestWechatAppToken(t *testing.T) {
+    a := assert.New(t)
     ConfigInstance = NewConfig()
 
     ConfigInstance.Address = ""
-    _, err := AppToken("codeName")
-    if nil == err || "未配置Varys.Address" != err.Error() {
-        t.Errorf("Should has error: 未配置Varys.Address")
-    }
+    _, err := WechatAppToken("codeName")
+    a.NotNil(err)
+    a.Equal("未配置Varys.Address", err.Error())
 
     testServer := httptest.NewServer(http.HandlerFunc(
         func(w http.ResponseWriter, r *http.Request) {
             w.WriteHeader(http.StatusInternalServerError)
         }))
     ConfigInstance.Address = testServer.URL
-    _, err = AppToken("codeName")
-    if nil == err || "请求AppToken失败" != err.Error() {
-        t.Errorf("Should has error: 请求AppToken失败")
-    }
+    _, err = WechatAppToken("codeName")
+    a.NotNil(err)
+    a.Equal("请求WechatAppToken失败", err.Error())
 
-    appTokenResp := AppTokenResp{Token: "token", AppId: "appId"}
+    appTokenResp := WechatAppTokenResp{Token: "token", AppId: "appId"}
     testServer = httptest.NewServer(http.HandlerFunc(
         func(w http.ResponseWriter, r *http.Request) {
-            if r.Method != "GET" {
-                t.Errorf("Except 'Get' got '%s'", r.Method)
-            }
-
-            if r.URL.EscapedPath() != "/query-wechat-app-token/codeName" {
-                t.Errorf("Except to path '/query-wechat-app-token/codeName',got '%s'", r.URL.EscapedPath())
-            }
+            a.Equal("GET", r.Method)
+            a.Equal("/query-wechat-app-token/codeName", r.URL.EscapedPath())
 
             w.WriteHeader(http.StatusOK)
             _, _ = w.Write([]byte(gokits.Json(appTokenResp)))
         }))
     ConfigInstance.Address = testServer.URL
-    resp, err := AppToken("codeName")
-    if nil != err {
-        t.Errorf("Should has no error")
-    }
-    if resp.Token != appTokenResp.Token ||
-        resp.AppId != appTokenResp.AppId {
-        t.Errorf("Response mismatch")
-    }
+    resp, err := WechatAppToken("codeName")
+    a.Nil(err)
+    a.Equal(appTokenResp.Token, resp.Token)
+    a.Equal(appTokenResp.AppId, resp.AppId)
 }
 
-func TestAppAuthorizerToken(t *testing.T) {
+func TestWechatTpToken(t *testing.T) {
+    a := assert.New(t)
     ConfigInstance = NewConfig()
 
     ConfigInstance.Address = ""
-    _, err := AppAuthorizerToken("codeName", "authorizerAppId")
-    if nil == err || "未配置Varys.Address" != err.Error() {
-        t.Errorf("Should has error: 未配置Varys.Address")
-    }
+    _, err := WechatTpToken("codeName")
+    a.NotNil(err)
+    a.Equal("未配置Varys.Address", err.Error())
 
     testServer := httptest.NewServer(http.HandlerFunc(
         func(w http.ResponseWriter, r *http.Request) {
             w.WriteHeader(http.StatusInternalServerError)
         }))
     ConfigInstance.Address = testServer.URL
-    _, err = AppAuthorizerToken("codeName", "authorizerAppId")
-    if nil == err || "请求AppAuthorizerToken失败" != err.Error() {
-        t.Errorf("Should has error: 请求AppAuthorizerToken失败")
-    }
+    _, err = WechatTpToken("codeName")
+    a.NotNil(err)
+    a.Equal("请求WechatTpToken失败", err.Error())
 
-    appAuthorizerTokenResp := AppAuthorizerTokenResp{Token: "token", AppId: "appId", AuthorizerAppId: "authorizerAppId"}
+    tpTokenResp := WechatTpTokenResp{Token: "token", AppId: "appId"}
     testServer = httptest.NewServer(http.HandlerFunc(
         func(w http.ResponseWriter, r *http.Request) {
-            if r.Method != "GET" {
-                t.Errorf("Except 'Get' got '%s'", r.Method)
-            }
-
-            if r.URL.EscapedPath() != "/query-wechat-app-authorizer-token/codeName/authorizerAppId" {
-                t.Errorf("Except to path '/query-wechat-app-authorizer-token/codeName/authorizerAppId',got '%s'", r.URL.EscapedPath())
-            }
+            a.Equal("GET", r.Method)
+            a.Equal("/query-wechat-tp-token/codeName", r.URL.EscapedPath())
 
             w.WriteHeader(http.StatusOK)
-            _, _ = w.Write([]byte(gokits.Json(appAuthorizerTokenResp)))
+            _, _ = w.Write([]byte(gokits.Json(tpTokenResp)))
         }))
     ConfigInstance.Address = testServer.URL
-    resp, err := AppAuthorizerToken("codeName", "authorizerAppId")
-    if nil != err {
-        t.Errorf("Should has no error")
-    }
-    if resp.Token != appAuthorizerTokenResp.Token ||
-        resp.AppId != appAuthorizerTokenResp.AppId ||
-        resp.AuthorizerAppId != appAuthorizerTokenResp.AuthorizerAppId {
-        t.Errorf("Response mismatch")
-    }
+    resp, err := WechatTpToken("codeName")
+    a.Nil(err)
+    a.Equal(tpTokenResp.Token, resp.Token)
+    a.Equal(tpTokenResp.AppId, resp.AppId)
 }
 
-func TestCorpToken(t *testing.T) {
+func TestWechatTpAuthToken(t *testing.T) {
+    a := assert.New(t)
     ConfigInstance = NewConfig()
 
     ConfigInstance.Address = ""
-    _, err := CorpToken("codeName")
-    if nil == err || "未配置Varys.Address" != err.Error() {
-        t.Errorf("Should has error: 未配置Varys.Address")
-    }
+    _, err := WechatTpAuthToken("codeName", "authorizerAppId")
+    a.NotNil(err)
+    a.Equal("未配置Varys.Address", err.Error())
 
     testServer := httptest.NewServer(http.HandlerFunc(
         func(w http.ResponseWriter, r *http.Request) {
             w.WriteHeader(http.StatusInternalServerError)
         }))
     ConfigInstance.Address = testServer.URL
-    _, err = CorpToken("codeName")
-    if nil == err || "请求CorpToken失败" != err.Error() {
-        t.Errorf("Should has error: 请求CorpToken失败")
-    }
+    _, err = WechatTpAuthToken("codeName", "authorizerAppId")
+    a.NotNil(err)
+    a.Equal("请求WechatTpAuthToken失败", err.Error())
 
-    corpTokenResp := CorpTokenResp{Token: "token", CorpId: "corpId"}
+    tpAuthTokenResp := WechatTpAuthTokenResp{Token: "token", AppId: "appId", AuthorizerAppId: "authorizerAppId"}
     testServer = httptest.NewServer(http.HandlerFunc(
         func(w http.ResponseWriter, r *http.Request) {
-            if r.Method != "GET" {
-                t.Errorf("Except 'Get' got '%s'", r.Method)
-            }
+            a.Equal("GET", r.Method)
+            a.Equal("/query-wechat-tp-auth-token/codeName/authorizerAppId", r.URL.EscapedPath())
 
-            if r.URL.EscapedPath() != "/query-wechat-corp-token/codeName" {
-                t.Errorf("Except to path '/query-wechat-corp-token/codeName',got '%s'", r.URL.EscapedPath())
-            }
+            w.WriteHeader(http.StatusOK)
+            _, _ = w.Write([]byte(gokits.Json(tpAuthTokenResp)))
+        }))
+    ConfigInstance.Address = testServer.URL
+    resp, err := WechatTpAuthToken("codeName", "authorizerAppId")
+    a.Nil(err)
+    a.Equal(tpAuthTokenResp.Token, resp.Token)
+    a.Equal(tpAuthTokenResp.AppId, resp.AppId)
+    a.Equal(tpAuthTokenResp.AuthorizerAppId, resp.AuthorizerAppId)
+
+    _, err = wechatTpAuthTokenCache.Value("codeName:authorizerAppId")
+    a.NotNil(err)
+    a.Equal("WechatTpAuthKey type error", err.Error())
+}
+
+func TestWechatCorpToken(t *testing.T) {
+    a := assert.New(t)
+    ConfigInstance = NewConfig()
+
+    ConfigInstance.Address = ""
+    _, err := WechatCorpToken("codeName")
+    a.NotNil(err)
+    a.Equal("未配置Varys.Address", err.Error())
+
+    testServer := httptest.NewServer(http.HandlerFunc(
+        func(w http.ResponseWriter, r *http.Request) {
+            w.WriteHeader(http.StatusInternalServerError)
+        }))
+    ConfigInstance.Address = testServer.URL
+    _, err = WechatCorpToken("codeName")
+    a.NotNil(err)
+    a.Equal("请求WechatCorpToken失败", err.Error())
+
+    corpTokenResp := WechatCorpTokenResp{Token: "token", CorpId: "corpId"}
+    testServer = httptest.NewServer(http.HandlerFunc(
+        func(w http.ResponseWriter, r *http.Request) {
+            a.Equal("GET", r.Method)
+            a.Equal("/query-wechat-corp-token/codeName", r.URL.EscapedPath())
 
             w.WriteHeader(http.StatusOK)
             _, _ = w.Write([]byte(gokits.Json(corpTokenResp)))
         }))
     ConfigInstance.Address = testServer.URL
-    resp, err := CorpToken("codeName")
-    if nil != err {
-        t.Errorf("Should has no error")
-    }
-    if resp.Token != corpTokenResp.Token ||
-        resp.CorpId != corpTokenResp.CorpId {
-        t.Errorf("Response mismatch")
-    }
+    resp, err := WechatCorpToken("codeName")
+    a.Nil(err)
+    a.Equal(corpTokenResp.Token, resp.Token)
+    a.Equal(corpTokenResp.CorpId, resp.CorpId)
 }
 
-func TestCorpAuthorizerToken(t *testing.T) {
+func TestWechatCorpTpAuthToken(t *testing.T) {
+    a := assert.New(t)
     ConfigInstance = NewConfig()
 
     ConfigInstance.Address = ""
-    _, err := CorpAuthorizerToken("codeName", "corpId")
-    if nil == err || "未配置Varys.Address" != err.Error() {
-        t.Errorf("Should has error: 未配置Varys.Address")
-    }
+    _, err := WechatCorpTpAuthToken("codeName", "corpId")
+    a.NotNil(err)
+    a.Equal("未配置Varys.Address", err.Error())
 
     testServer := httptest.NewServer(http.HandlerFunc(
         func(w http.ResponseWriter, r *http.Request) {
             w.WriteHeader(http.StatusInternalServerError)
         }))
     ConfigInstance.Address = testServer.URL
-    _, err = CorpAuthorizerToken("codeName", "corpId")
-    if nil == err || "请求CorpAuthorizerToken失败" != err.Error() {
-        t.Errorf("Should has error: 请求CorpAuthorizerToken失败")
-    }
+    _, err = WechatCorpTpAuthToken("codeName", "corpId")
+    a.NotNil(err)
+    a.Equal("请求WechatCorpTpAuthToken失败", err.Error())
 
-    corpAuthorizerTokenResp := CorpAuthorizerTokenResp{Token: "token", CorpId: "appId", SuiteId: "suiteId"}
+    corpTpAuthTokenResp := WechatCorpTpAuthTokenResp{Token: "token", CorpId: "appId", SuiteId: "suiteId"}
     testServer = httptest.NewServer(http.HandlerFunc(
         func(w http.ResponseWriter, r *http.Request) {
-            if r.Method != "GET" {
-                t.Errorf("Except 'Get' got '%s'", r.Method)
-            }
-
-            if r.URL.EscapedPath() != "/query-wechat-corp-authorizer-token/codeName/corpId" {
-                t.Errorf("Except to path '/query-wechat-corp-authorizer-token/codeName/corpId',got '%s'", r.URL.EscapedPath())
-            }
+            a.Equal("GET", r.Method)
+            a.Equal("/query-wechat-corp-tp-auth-token/codeName/corpId", r.URL.EscapedPath())
 
             w.WriteHeader(http.StatusOK)
-            _, _ = w.Write([]byte(gokits.Json(corpAuthorizerTokenResp)))
+            _, _ = w.Write([]byte(gokits.Json(corpTpAuthTokenResp)))
         }))
     ConfigInstance.Address = testServer.URL
-    resp, err := CorpAuthorizerToken("codeName", "corpId")
-    if nil != err {
-        t.Errorf("Should has no error")
-    }
-    if resp.Token != corpAuthorizerTokenResp.Token ||
-        resp.CorpId != corpAuthorizerTokenResp.CorpId ||
-        resp.SuiteId != corpAuthorizerTokenResp.SuiteId {
-        t.Errorf("Response mismatch")
-    }
+    resp, err := WechatCorpTpAuthToken("codeName", "corpId")
+    a.Nil(err)
+    a.Equal(corpTpAuthTokenResp.Token, resp.Token)
+    a.Equal(corpTpAuthTokenResp.CorpId, resp.CorpId)
+    a.Equal(corpTpAuthTokenResp.SuiteId, resp.SuiteId)
+
+    _, err = wechatCorpTpAuthTokenCache.Value("codeName:corpId")
+    a.NotNil(err)
+    a.Equal("WechatCorpTpAuthKey type error", err.Error())
+}
+
+func TestToutiaoAppToken(t *testing.T) {
+    a := assert.New(t)
+    ConfigInstance = NewConfig()
+
+    ConfigInstance.Address = ""
+    _, err := ToutiaoAppToken("codeName")
+    a.NotNil(err)
+    a.Equal("未配置Varys.Address", err.Error())
+
+    testServer := httptest.NewServer(http.HandlerFunc(
+        func(w http.ResponseWriter, r *http.Request) {
+            w.WriteHeader(http.StatusInternalServerError)
+        }))
+    ConfigInstance.Address = testServer.URL
+    _, err = ToutiaoAppToken("codeName")
+    a.NotNil(err)
+    a.Equal("请求ToutiaoAppToken失败", err.Error())
+
+    appTokenResp := ToutiaoAppTokenResp{Token: "token", AppId: "appId"}
+    testServer = httptest.NewServer(http.HandlerFunc(
+        func(w http.ResponseWriter, r *http.Request) {
+            a.Equal("GET", r.Method)
+            a.Equal("/query-toutiao-app-token/codeName", r.URL.EscapedPath())
+
+            w.WriteHeader(http.StatusOK)
+            _, _ = w.Write([]byte(gokits.Json(appTokenResp)))
+        }))
+    ConfigInstance.Address = testServer.URL
+    resp, err := ToutiaoAppToken("codeName")
+    a.Nil(err)
+    a.Equal(appTokenResp.Token, resp.Token)
+    a.Equal(appTokenResp.AppId, resp.AppId)
+}
+
+func TestWechatMpLogin(t *testing.T) {
+    a := assert.New(t)
+    ConfigInstance = NewConfig()
+
+    ConfigInstance.Address = ""
+    _, err := WechatMpLogin("codeName", "js_code")
+    a.NotNil(err)
+    a.Equal("未配置Varys.Address", err.Error())
+
+    testServer := httptest.NewServer(http.HandlerFunc(
+        func(w http.ResponseWriter, r *http.Request) {
+            w.WriteHeader(http.StatusInternalServerError)
+        }))
+    ConfigInstance.Address = testServer.URL
+    _, err = WechatMpLogin("codeName", "js_code")
+    a.NotNil(err)
+    a.Equal("请求WechatMpLogin失败", err.Error())
+
+    mpLoginResp := WechatMpLoginResp{OpenId: "open_id", SessionKey: "session_key", UnionId: "unionid"}
+    testServer = httptest.NewServer(http.HandlerFunc(
+        func(w http.ResponseWriter, r *http.Request) {
+            a.Equal("GET", r.Method)
+            a.Equal("/proxy-wechat-mp-login/codeName", r.URL.EscapedPath())
+            a.Equal("js_code", r.FormValue("js_code"))
+
+            w.WriteHeader(http.StatusOK)
+            _, _ = w.Write([]byte(gokits.Json(mpLoginResp)))
+        }))
+    ConfigInstance.Address = testServer.URL
+    resp, err := WechatMpLogin("codeName", "js_code")
+    a.Nil(err)
+    a.Equal(mpLoginResp.OpenId, resp.OpenId)
+    a.Equal(mpLoginResp.SessionKey, resp.SessionKey)
+    a.Equal(mpLoginResp.UnionId, resp.UnionId)
+
 }

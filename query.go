@@ -6,124 +6,172 @@ import (
     "time"
 )
 
-type AppTokenResp struct {
-    Token string `json:"token"`
+type WechatAppTokenResp struct {
     Error string `json:"error"`
     AppId string `json:"appId"`
+    Token string `json:"token"`
 }
 
-type AppAuthorizerTokenResp struct {
-    Token           string `json:"token"`
+type WechatTpTokenResp struct {
+    Error string `json:"error"`
+    AppId string `json:"appId"`
+    Token string `json:"token"`
+}
+
+type WechatTpAuthTokenResp struct {
     Error           string `json:"error"`
     AppId           string `json:"appId"`
     AuthorizerAppId string `json:"authorizerAppId"`
+    Token           string `json:"token"`
 }
 
-type CorpTokenResp struct {
-    Token  string `json:"token"`
+type WechatCorpTokenResp struct {
     Error  string `json:"error"`
     CorpId string `json:"corpId"`
+    Token  string `json:"token"`
 }
 
-type CorpAuthorizerTokenResp struct {
-    Token   string `json:"token"`
+type WechatCorpTpAuthTokenResp struct {
     Error   string `json:"error"`
     SuiteId string `json:"suiteId"`
     CorpId  string `json:"corpId"`
+    Token   string `json:"token"`
 }
 
-var appTokenCache *gokits.CacheTable
-var appAuthorizerTokenCache *gokits.CacheTable
-var corpTokenCache *gokits.CacheTable
-var corpAuthorizerTokenCache *gokits.CacheTable
+type ToutiaoAppTokenResp struct {
+    Error string `json:"error"`
+    AppId string `json:"appId"`
+    Token string `json:"token"`
+}
+
+type WechatMpLoginResp struct {
+    OpenId     string `json:"openid"`
+    SessionKey string `json:"session_key"`
+    UnionId    string `json:"unionid"`
+    Errcode    int    `json:"errcode"`
+    Errmsg     string `json:"errmsg"`
+}
+
+var wechatAppTokenCache *gokits.CacheTable
+var wechatTpTokenCache *gokits.CacheTable
+var wechatTpAuthTokenCache *gokits.CacheTable
+var wechatCorpTokenCache *gokits.CacheTable
+var wechatCorpTpAuthTokenCache *gokits.CacheTable
+var toutiaoAppTokenCache *gokits.CacheTable
 
 func init() {
-    appTokenCache = gokits.CacheExpireAfterWrite("appTokenCache")
-    appTokenCache.SetDataLoader(appTokenLoader)
-    appAuthorizerTokenCache = gokits.CacheExpireAfterWrite("appAuthorizerTokenCache")
-    appAuthorizerTokenCache.SetDataLoader(appAuthorizerTokenLoader)
-    corpTokenCache = gokits.CacheExpireAfterWrite("corpTokenCache")
-    corpTokenCache.SetDataLoader(corpTokenLoader)
-    corpAuthorizerTokenCache = gokits.CacheExpireAfterWrite("corpAuthorizerTokenCache")
-    corpAuthorizerTokenCache.SetDataLoader(corpAuthorizerTokenLoader)
+    wechatAppTokenCache = gokits.CacheExpireAfterWrite("WechatAppTokenCache")
+    wechatAppTokenCache.SetDataLoader(wechatAppTokenLoader)
+    wechatTpTokenCache = gokits.CacheExpireAfterWrite("WechatTpTokenCache")
+    wechatTpTokenCache.SetDataLoader(wechatTpTokenLoader)
+    wechatTpAuthTokenCache = gokits.CacheExpireAfterWrite("WechatTpAuthTokenCache")
+    wechatTpAuthTokenCache.SetDataLoader(wechatTpAuthTokenLoader)
+    wechatCorpTokenCache = gokits.CacheExpireAfterWrite("WechatCorpTokenCache")
+    wechatCorpTokenCache.SetDataLoader(wechatCorpTokenLoader)
+    wechatCorpTpAuthTokenCache = gokits.CacheExpireAfterWrite("WechatCorpTpAuthTokenCache")
+    wechatCorpTpAuthTokenCache.SetDataLoader(wechatCorpTpAuthTokenLoader)
+    toutiaoAppTokenCache = gokits.CacheExpireAfterWrite("ToutiaoAppTokenCache")
+    toutiaoAppTokenCache.SetDataLoader(toutiaoAppTokenLoader)
 }
 
-//noinspection GoUnusedParameter
-func appTokenLoader(codeName interface{}, args ...interface{}) (*gokits.CacheItem, error) {
-    resp, err := httpGet(gokits.PathJoin(ConfigInstance.AppTokenCachePath, codeName.(string)))
+func wechatAppTokenLoader(codeName interface{}, _ ...interface{}) (*gokits.CacheItem, error) {
+    resp, err := httpGet(gokits.PathJoin("/query-wechat-app-token/", codeName.(string)))
     if nil != err {
         return nil, err
     }
     if 0 == len(resp) {
-        return nil, errors.New("请求AppToken失败")
+        return nil, errors.New("请求WechatAppToken失败")
     }
     return gokits.NewCacheItem(codeName,
-        ConfigInstance.AppTokenCacheDurationInMinutes*time.Minute,
-        gokits.UnJson(resp, new(AppTokenResp))), nil
+        ConfigInstance.WechatAppTokenCacheDuration*time.Minute,
+        gokits.UnJson(resp, new(WechatAppTokenResp))), nil
 }
 
-type AppAuthorizerTokenKey struct {
+func wechatTpTokenLoader(codeName interface{}, _ ...interface{}) (*gokits.CacheItem, error) {
+    resp, err := httpGet(gokits.PathJoin("/query-wechat-tp-token/", codeName.(string)))
+    if nil != err {
+        return nil, err
+    }
+    if 0 == len(resp) {
+        return nil, errors.New("请求WechatTpToken失败")
+    }
+    return gokits.NewCacheItem(codeName,
+        ConfigInstance.WechatTpTokenCacheDuration*time.Minute,
+        gokits.UnJson(resp, new(WechatTpTokenResp))), nil
+}
+
+type WechatTpAuthKey struct {
     CodeName        string
     AuthorizerAppId string
 }
 
-//noinspection GoUnusedParameter
-func appAuthorizerTokenLoader(key interface{}, args ...interface{}) (*gokits.CacheItem, error) {
-    tokenKey, ok := key.(AppAuthorizerTokenKey)
+func wechatTpAuthTokenLoader(key interface{}, _ ...interface{}) (*gokits.CacheItem, error) {
+    authKey, ok := key.(WechatTpAuthKey)
     if !ok {
-        return nil, errors.New("AppAuthorizerTokenKey type error")
+        return nil, errors.New("WechatTpAuthKey type error")
     }
     resp, err := httpGet(gokits.PathJoin(
-        ConfigInstance.AppAuthorizerTokenCachePath,
-        tokenKey.CodeName, tokenKey.AuthorizerAppId))
+        "/query-wechat-tp-auth-token/",
+        authKey.CodeName, authKey.AuthorizerAppId))
     if nil != err {
         return nil, err
     }
     if 0 == len(resp) {
-        return nil, errors.New("请求AppAuthorizerToken失败")
+        return nil, errors.New("请求WechatTpAuthToken失败")
     }
     return gokits.NewCacheItem(key,
-        ConfigInstance.AppAuthorizerTokenCacheDurationInMinutes*time.Minute,
-        gokits.UnJson(resp, new(AppAuthorizerTokenResp))), nil
+        ConfigInstance.WechatTpAuthTokenCacheDuration*time.Minute,
+        gokits.UnJson(resp, new(WechatTpAuthTokenResp))), nil
 }
 
-//noinspection GoUnusedParameter
-func corpTokenLoader(codeName interface{}, args ...interface{}) (*gokits.CacheItem, error) {
-    resp, err := httpGet(gokits.PathJoin(ConfigInstance.CorpTokenCachePath, codeName.(string)))
+func wechatCorpTokenLoader(codeName interface{}, _ ...interface{}) (*gokits.CacheItem, error) {
+    resp, err := httpGet(gokits.PathJoin("/query-wechat-corp-token/", codeName.(string)))
     if nil != err {
         return nil, err
     }
     if 0 == len(resp) {
-        return nil, errors.New("请求CorpToken失败")
+        return nil, errors.New("请求WechatCorpToken失败")
     }
     return gokits.NewCacheItem(codeName,
-        ConfigInstance.CorpTokenCacheDurationInMinutes*time.Minute,
-        gokits.UnJson(resp, new(CorpTokenResp))), nil
+        ConfigInstance.WechatCorpTokenCacheDuration*time.Minute,
+        gokits.UnJson(resp, new(WechatCorpTokenResp))), nil
 }
 
-type CorpAuthorizerTokenKey struct {
+type WechatCorpTpAuthKey struct {
     CodeName string
     CorpId   string
 }
 
-//noinspection GoUnusedParameter
-func corpAuthorizerTokenLoader(key interface{}, args ...interface{}) (*gokits.CacheItem, error) {
-    tokenKey, ok := key.(CorpAuthorizerTokenKey)
+func wechatCorpTpAuthTokenLoader(key interface{}, _ ...interface{}) (*gokits.CacheItem, error) {
+    authKey, ok := key.(WechatCorpTpAuthKey)
     if !ok {
-        return nil, errors.New("CorpAuthorizerTokenKey type error")
+        return nil, errors.New("WechatCorpTpAuthKey type error")
     }
     resp, err := httpGet(gokits.PathJoin(
-        ConfigInstance.CorpAuthorizerTokenCachePath,
-        tokenKey.CodeName, tokenKey.CorpId))
+        "/query-wechat-corp-tp-auth-token/",
+        authKey.CodeName, authKey.CorpId))
     if nil != err {
         return nil, err
     }
     if 0 == len(resp) {
-        return nil, errors.New("请求CorpAuthorizerToken失败")
+        return nil, errors.New("请求WechatCorpTpAuthToken失败")
     }
     return gokits.NewCacheItem(key,
-        ConfigInstance.CorpAuthorizerTokenCacheDurationInMinutes*time.Minute,
-        gokits.UnJson(resp, new(CorpAuthorizerTokenResp))), nil
+        ConfigInstance.WechatCorpTpAuthTokenCacheDuration*time.Minute,
+        gokits.UnJson(resp, new(WechatCorpTpAuthTokenResp))), nil
+}
+
+func toutiaoAppTokenLoader(codeName interface{}, _ ...interface{}) (*gokits.CacheItem, error) {
+    resp, err := httpGet(gokits.PathJoin("/query-toutiao-app-token/", codeName.(string)))
+    if nil != err {
+        return nil, err
+    }
+    if 0 == len(resp) {
+        return nil, errors.New("请求ToutiaoAppToken失败")
+    }
+    return gokits.NewCacheItem(codeName,
+        ConfigInstance.ToutiaoAppTokenCacheDuration*time.Minute,
+        gokits.UnJson(resp, new(ToutiaoAppTokenResp))), nil
 }
 
 func httpGet(subpath string) (string, error) {
@@ -133,36 +181,63 @@ func httpGet(subpath string) (string, error) {
     return gokits.NewHttpReq(ConfigInstance.Path(subpath)).Get()
 }
 
-func AppToken(codeName string) (*AppTokenResp, error) {
-    cache, err := appTokenCache.Value(codeName)
+func WechatAppToken(codeName string) (*WechatAppTokenResp, error) {
+    value, err := wechatAppTokenCache.Value(codeName)
     if nil != err {
         return nil, err
     }
-    return cache.Data().(*AppTokenResp), nil
+    return value.Data().(*WechatAppTokenResp), nil
 }
 
-func AppAuthorizerToken(codeName, authorizerAppId string) (*AppAuthorizerTokenResp, error) {
-    cache, err := appAuthorizerTokenCache.Value(AppAuthorizerTokenKey{
+func WechatTpToken(codeName string) (*WechatTpTokenResp, error) {
+    value, err := wechatTpTokenCache.Value(codeName)
+    if nil != err {
+        return nil, err
+    }
+    return value.Data().(*WechatTpTokenResp), nil
+}
+
+func WechatTpAuthToken(codeName, authorizerAppId string) (*WechatTpAuthTokenResp, error) {
+    value, err := wechatTpAuthTokenCache.Value(WechatTpAuthKey{
         CodeName: codeName, AuthorizerAppId: authorizerAppId})
     if nil != err {
         return nil, err
     }
-    return cache.Data().(*AppAuthorizerTokenResp), err
+    return value.Data().(*WechatTpAuthTokenResp), nil
 }
 
-func CorpToken(codeName string) (*CorpTokenResp, error) {
-    cache, err := corpTokenCache.Value(codeName)
+func WechatCorpToken(codeName string) (*WechatCorpTokenResp, error) {
+    value, err := wechatCorpTokenCache.Value(codeName)
     if nil != err {
         return nil, err
     }
-    return cache.Data().(*CorpTokenResp), nil
+    return value.Data().(*WechatCorpTokenResp), nil
 }
 
-func CorpAuthorizerToken(codeName, corpId string) (*CorpAuthorizerTokenResp, error) {
-    cache, err := corpAuthorizerTokenCache.Value(CorpAuthorizerTokenKey{
+func WechatCorpTpAuthToken(codeName, corpId string) (*WechatCorpTpAuthTokenResp, error) {
+    value, err := wechatCorpTpAuthTokenCache.Value(WechatCorpTpAuthKey{
         CodeName: codeName, CorpId: corpId})
     if nil != err {
         return nil, err
     }
-    return cache.Data().(*CorpAuthorizerTokenResp), nil
+    return value.Data().(*WechatCorpTpAuthTokenResp), nil
+}
+
+func ToutiaoAppToken(codeName string) (*ToutiaoAppTokenResp, error) {
+    value, err := toutiaoAppTokenCache.Value(codeName)
+    if nil != err {
+        return nil, err
+    }
+    return value.Data().(*ToutiaoAppTokenResp), nil
+}
+
+func WechatMpLogin(codeName, jsCode string) (*WechatMpLoginResp, error) {
+    resp, err := httpGet(gokits.PathJoin("/proxy-wechat-mp-login/", codeName) + "?js_code=" + jsCode)
+    if nil != err {
+        return nil, err
+    }
+    if 0 == len(resp) {
+        return nil, errors.New("请求WechatMpLogin失败")
+    }
+    return gokits.UnJson(resp, new(WechatMpLoginResp)).(*WechatMpLoginResp), nil
 }

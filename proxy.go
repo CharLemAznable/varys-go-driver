@@ -44,12 +44,22 @@ func (proxyReq *ProxyReq) Post() (string, error) {
 }
 
 func WechatApp(codeName string, proxyPathTemplate string, proxyPathArgs ...interface{}) *ProxyReq {
-    return NewProxyReq(ConfigInstance.Path(ConfigInstance.ProxyWechatAppPath,
+    return NewProxyReq(ConfigInstance.Path("/proxy-wechat-app/",
+        codeName, proxyPath(proxyPathTemplate, proxyPathArgs...)))
+}
+
+func WechatMp(codeName string, proxyPathTemplate string, proxyPathArgs ...interface{}) *ProxyReq {
+    return NewProxyReq(ConfigInstance.Path("/proxy-wechat-mp/",
+        codeName, proxyPath(proxyPathTemplate, proxyPathArgs...)))
+}
+
+func WechatTp(codeName string, proxyPathTemplate string, proxyPathArgs ...interface{}) *ProxyReq {
+    return NewProxyReq(ConfigInstance.Path("/proxy-wechat-tp/",
         codeName, proxyPath(proxyPathTemplate, proxyPathArgs...)))
 }
 
 func WechatCorp(codeName string, proxyPathTemplate string, proxyPathArgs ...interface{}) *ProxyReq {
-    return NewProxyReq(ConfigInstance.Path(ConfigInstance.ProxyWechatCorpPath,
+    return NewProxyReq(ConfigInstance.Path("/proxy-wechat-corp/",
         codeName, proxyPath(proxyPathTemplate, proxyPathArgs...)))
 }
 

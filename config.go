@@ -7,45 +7,33 @@ import (
 )
 
 type Config struct {
-    Address                                   string
-    AppTokenCachePath                         string
-    AppAuthorizerTokenCachePath               string
-    CorpTokenCachePath                        string
-    CorpAuthorizerTokenCachePath              string
-    ProxyWechatAppPath                        string
-    ProxyWechatCorpPath                       string
-    AppTokenCacheDurationInMinutes            time.Duration
-    AppAuthorizerTokenCacheDurationInMinutes  time.Duration
-    CorpTokenCacheDurationInMinutes           time.Duration
-    CorpAuthorizerTokenCacheDurationInMinutes time.Duration
+    Address                            string
+    WechatAppTokenCacheDuration        time.Duration
+    WechatTpTokenCacheDuration         time.Duration
+    WechatTpAuthTokenCacheDuration     time.Duration
+    WechatCorpTokenCacheDuration       time.Duration
+    WechatCorpTpAuthTokenCacheDuration time.Duration
+    ToutiaoAppTokenCacheDuration       time.Duration
 }
 
 type ConfigOptions struct {
-    Address                                   string
-    AppTokenCachePath                         string
-    AppAuthorizerTokenCachePath               string
-    CorpTokenCachePath                        string
-    CorpAuthorizerTokenCachePath              string
-    ProxyWechatAppPath                        string
-    ProxyWechatCorpPath                       string
-    AppTokenCacheDurationInMinutes            time.Duration
-    AppAuthorizerTokenCacheDurationInMinutes  time.Duration
-    CorpTokenCacheDurationInMinutes           time.Duration
-    CorpAuthorizerTokenCacheDurationInMinutes time.Duration
+    Address                            string
+    WechatAppTokenCacheDuration        time.Duration
+    WechatTpTokenCacheDuration         time.Duration
+    WechatTpAuthTokenCacheDuration     time.Duration
+    WechatCorpTokenCacheDuration       time.Duration
+    WechatCorpTpAuthTokenCacheDuration time.Duration
+    ToutiaoAppTokenCacheDuration       time.Duration
 }
 
 var defaultConfigOptions = ConfigOptions{
-    Address:                                   "http://127.0.0.1:4236",
-    AppTokenCachePath:                         "/query-wechat-app-token/",
-    AppAuthorizerTokenCachePath:               "/query-wechat-app-authorizer-token/",
-    CorpTokenCachePath:                        "/query-wechat-corp-token/",
-    CorpAuthorizerTokenCachePath:              "/query-wechat-corp-authorizer-token/",
-    ProxyWechatAppPath:                        "/proxy-wechat-app/",
-    ProxyWechatCorpPath:                       "/proxy-wechat-corp/",
-    AppTokenCacheDurationInMinutes:            10,
-    AppAuthorizerTokenCacheDurationInMinutes:  10,
-    CorpTokenCacheDurationInMinutes:           10,
-    CorpAuthorizerTokenCacheDurationInMinutes: 10,
+    Address:                            "http://127.0.0.1:4236",
+    WechatAppTokenCacheDuration:        time.Minute * 10,
+    WechatTpTokenCacheDuration:         time.Minute * 10,
+    WechatTpAuthTokenCacheDuration:     time.Minute * 10,
+    WechatCorpTokenCacheDuration:       time.Minute * 10,
+    WechatCorpTpAuthTokenCacheDuration: time.Minute * 10,
+    ToutiaoAppTokenCacheDuration:       time.Minute * 10,
 }
 
 type ConfigOption func(*ConfigOptions)
@@ -54,48 +42,28 @@ func WithAddress(address string) ConfigOption {
     return func(o *ConfigOptions) { o.Address = address }
 }
 
-func WithAppTokenCachePath(appTokenCachePath string) ConfigOption {
-    return func(o *ConfigOptions) { o.AppTokenCachePath = appTokenCachePath }
+func WithWechatAppTokenCacheDuration(wechatAppTokenCacheDuration time.Duration) ConfigOption {
+    return func(o *ConfigOptions) { o.WechatAppTokenCacheDuration = wechatAppTokenCacheDuration }
 }
 
-func WithAppAuthorizerTokenCachePath(appAuthorizerTokenCachePath string) ConfigOption {
-    return func(o *ConfigOptions) { o.AppAuthorizerTokenCachePath = appAuthorizerTokenCachePath }
+func WithWechatTpTokenCacheDuration(wechatTpTokenCacheDuration time.Duration) ConfigOption {
+    return func(o *ConfigOptions) { o.WechatTpTokenCacheDuration = wechatTpTokenCacheDuration }
 }
 
-func WithCorpTokenCachePath(corpTokenCachePath string) ConfigOption {
-    return func(o *ConfigOptions) { o.CorpTokenCachePath = corpTokenCachePath }
+func WithWechatTpAuthTokenCacheDuration(wechatTpAuthTokenCacheDuration time.Duration) ConfigOption {
+    return func(o *ConfigOptions) { o.WechatTpAuthTokenCacheDuration = wechatTpAuthTokenCacheDuration }
 }
 
-func WithCorpAuthorizerTokenCachePath(corpAuthorizerTokenCachePath string) ConfigOption {
-    return func(o *ConfigOptions) { o.CorpAuthorizerTokenCachePath = corpAuthorizerTokenCachePath }
+func WithWechatCorpTokenCacheDuration(wechatCorpTokenCacheDuration time.Duration) ConfigOption {
+    return func(o *ConfigOptions) { o.WechatCorpTokenCacheDuration = wechatCorpTokenCacheDuration }
 }
 
-func WithProxyWechatAppPath(proxyWechatAppPath string) ConfigOption {
-    return func(o *ConfigOptions) { o.ProxyWechatAppPath = proxyWechatAppPath }
+func WithWechatCorpTpAuthTokenCacheDuration(wechatCorpTpAuthTokenCacheDuration time.Duration) ConfigOption {
+    return func(o *ConfigOptions) { o.WechatCorpTpAuthTokenCacheDuration = wechatCorpTpAuthTokenCacheDuration }
 }
 
-func WithProxyWechatCorpPath(proxyWechatCorpPath string) ConfigOption {
-    return func(o *ConfigOptions) { o.ProxyWechatCorpPath = proxyWechatCorpPath }
-}
-
-func WithAppTokenCacheDurationInMinutes(appTokenCacheDurationInMinutes time.Duration) ConfigOption {
-    return func(o *ConfigOptions) { o.AppTokenCacheDurationInMinutes = appTokenCacheDurationInMinutes }
-}
-
-func WithAppAuthorizerTokenCacheDurationInMinutes(appAuthorizerTokenCacheDurationInMinutes time.Duration) ConfigOption {
-    return func(o *ConfigOptions) {
-        o.AppAuthorizerTokenCacheDurationInMinutes = appAuthorizerTokenCacheDurationInMinutes
-    }
-}
-
-func WithCorpTokenCacheDurationInMinutes(corpTokenCacheDurationInMinutes time.Duration) ConfigOption {
-    return func(o *ConfigOptions) { o.CorpTokenCacheDurationInMinutes = corpTokenCacheDurationInMinutes }
-}
-
-func WithCorpAuthorizerTokenCacheDurationInMinutes(corpAuthorizerTokenCacheDurationInMinutes time.Duration) ConfigOption {
-    return func(o *ConfigOptions) {
-        o.CorpAuthorizerTokenCacheDurationInMinutes = corpAuthorizerTokenCacheDurationInMinutes
-    }
+func WithToutiaoAppTokenCacheDuration(toutiaoAppTokenCacheDuration time.Duration) ConfigOption {
+    return func(o *ConfigOptions) { o.ToutiaoAppTokenCacheDuration = toutiaoAppTokenCacheDuration }
 }
 
 func NewConfig(opts ...ConfigOption) *Config {
@@ -104,17 +72,13 @@ func NewConfig(opts ...ConfigOption) *Config {
         o(&options)
     }
     return &Config{
-        Address:                                   options.Address,
-        AppTokenCachePath:                         options.AppTokenCachePath,
-        AppAuthorizerTokenCachePath:               options.AppAuthorizerTokenCachePath,
-        CorpTokenCachePath:                        options.CorpTokenCachePath,
-        CorpAuthorizerTokenCachePath:              options.CorpAuthorizerTokenCachePath,
-        ProxyWechatAppPath:                        options.ProxyWechatAppPath,
-        ProxyWechatCorpPath:                       options.ProxyWechatCorpPath,
-        AppTokenCacheDurationInMinutes:            options.AppTokenCacheDurationInMinutes,
-        AppAuthorizerTokenCacheDurationInMinutes:  options.AppAuthorizerTokenCacheDurationInMinutes,
-        CorpTokenCacheDurationInMinutes:           options.CorpTokenCacheDurationInMinutes,
-        CorpAuthorizerTokenCacheDurationInMinutes: options.CorpAuthorizerTokenCacheDurationInMinutes,
+        Address:                            options.Address,
+        WechatAppTokenCacheDuration:        options.WechatAppTokenCacheDuration,
+        WechatTpTokenCacheDuration:         options.WechatTpTokenCacheDuration,
+        WechatTpAuthTokenCacheDuration:     options.WechatTpAuthTokenCacheDuration,
+        WechatCorpTokenCacheDuration:       options.WechatCorpTokenCacheDuration,
+        WechatCorpTpAuthTokenCacheDuration: options.WechatCorpTpAuthTokenCacheDuration,
+        ToutiaoAppTokenCacheDuration:       options.ToutiaoAppTokenCacheDuration,
     }
 }
 

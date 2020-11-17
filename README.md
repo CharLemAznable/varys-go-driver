@@ -7,4 +7,4 @@
 [![GoDoc](https://godoc.org/github.com/CharLemAznable/varys-go-driver?status.svg)](https://godoc.org/github.com/CharLemAznable/varys-go-driver)
 ![GitHub code size](https://img.shields.io/github/languages/code-size/CharLemAznable/varys-go-driver)
 
-Golang Kits for [varys](https://github.com/CharLemAznable/varys).
+Golang client for [varys](https://github.com/CharLemAznable/varys).

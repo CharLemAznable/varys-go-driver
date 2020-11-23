@@ -26,7 +26,7 @@ func TestWechatAppToken(t *testing.T) {
     a.NotNil(err)
     a.Equal("请求WechatAppToken失败", err.Error())
 
-    appTokenResp := WechatAppTokenResp{Token: "token", AppId: "appId"}
+    appTokenResp := WechatAppTokenResp{AppId: "appId", Token: "token", Ticket: "ticket"}
     testServer = httptest.NewServer(http.HandlerFunc(
         func(w http.ResponseWriter, r *http.Request) {
             a.Equal("GET", r.Method)
@@ -38,8 +38,82 @@ func TestWechatAppToken(t *testing.T) {
     ConfigInstance.Address = testServer.URL
     resp, err := WechatAppToken("codeName")
     a.Nil(err)
-    a.Equal(appTokenResp.Token, resp.Token)
     a.Equal(appTokenResp.AppId, resp.AppId)
+    a.Equal(appTokenResp.Token, resp.Token)
+    a.Equal(appTokenResp.Ticket, resp.Ticket)
+}
+
+func TestWechatMpLogin(t *testing.T) {
+    a := assert.New(t)
+    ConfigInstance = NewConfig()
+
+    ConfigInstance.Address = ""
+    _, err := WechatMpLogin("codeName", "js_code")
+    a.NotNil(err)
+    a.Equal("未配置Varys.Address", err.Error())
+
+    testServer := httptest.NewServer(http.HandlerFunc(
+        func(w http.ResponseWriter, r *http.Request) {
+            w.WriteHeader(http.StatusInternalServerError)
+        }))
+    ConfigInstance.Address = testServer.URL
+    _, err = WechatMpLogin("codeName", "js_code")
+    a.NotNil(err)
+    a.Equal("请求WechatMpLogin失败", err.Error())
+
+    mpLoginResp := WechatMpLoginResp{OpenId: "open_id", SessionKey: "session_key", UnionId: "unionid"}
+    testServer = httptest.NewServer(http.HandlerFunc(
+        func(w http.ResponseWriter, r *http.Request) {
+            a.Equal("GET", r.Method)
+            a.Equal("/proxy-wechat-mp-login/codeName", r.URL.EscapedPath())
+            a.Equal("js_code", r.FormValue("js_code"))
+
+            w.WriteHeader(http.StatusOK)
+            _, _ = w.Write([]byte(gokits.Json(mpLoginResp)))
+        }))
+    ConfigInstance.Address = testServer.URL
+    resp, err := WechatMpLogin("codeName", "js_code")
+    a.Nil(err)
+    a.Equal(mpLoginResp.OpenId, resp.OpenId)
+    a.Equal(mpLoginResp.SessionKey, resp.SessionKey)
+    a.Equal(mpLoginResp.UnionId, resp.UnionId)
+}
+
+func TestWechatAppJsConfig(t *testing.T) {
+    a := assert.New(t)
+    ConfigInstance = NewConfig()
+
+    ConfigInstance.Address = ""
+    _, err := WechatAppJsConfig("codeName", "http://varys.com/test")
+    a.NotNil(err)
+    a.Equal("未配置Varys.Address", err.Error())
+
+    testServer := httptest.NewServer(http.HandlerFunc(
+        func(w http.ResponseWriter, r *http.Request) {
+            w.WriteHeader(http.StatusInternalServerError)
+        }))
+    ConfigInstance.Address = testServer.URL
+    _, err = WechatAppJsConfig("codeName", "http://varys.com/test")
+    a.NotNil(err)
+    a.Equal("请求WechatAppJsConfig失败", err.Error())
+
+    jsConfigResp := WechatJsConfigResp{AppId: "appId", NonceStr: "nonceStr", Timestamp: 100, Signature: "signature"}
+    testServer = httptest.NewServer(http.HandlerFunc(
+        func(w http.ResponseWriter, r *http.Request) {
+            a.Equal("GET", r.Method)
+            a.Equal("/query-wechat-app-js-config/codeName", r.URL.EscapedPath())
+            a.Equal("http://varys.com/test", r.FormValue("url"))
+
+            w.WriteHeader(http.StatusOK)
+            _, _ = w.Write([]byte(gokits.Json(jsConfigResp)))
+        }))
+    ConfigInstance.Address = testServer.URL
+    resp, err := WechatAppJsConfig("codeName", "http://varys.com/test")
+    a.Nil(err)
+    a.Equal(jsConfigResp.AppId, resp.AppId)
+    a.Equal(jsConfigResp.NonceStr, resp.NonceStr)
+    a.Equal(jsConfigResp.Timestamp, resp.Timestamp)
+    a.Equal(jsConfigResp.Signature, resp.Signature)
 }
 
 func TestWechatTpToken(t *testing.T) {
@@ -60,7 +134,7 @@ func TestWechatTpToken(t *testing.T) {
     a.NotNil(err)
     a.Equal("请求WechatTpToken失败", err.Error())
 
-    tpTokenResp := WechatTpTokenResp{Token: "token", AppId: "appId"}
+    tpTokenResp := WechatTpTokenResp{AppId: "appId", Token: "token"}
     testServer = httptest.NewServer(http.HandlerFunc(
         func(w http.ResponseWriter, r *http.Request) {
             a.Equal("GET", r.Method)
@@ -72,8 +146,8 @@ func TestWechatTpToken(t *testing.T) {
     ConfigInstance.Address = testServer.URL
     resp, err := WechatTpToken("codeName")
     a.Nil(err)
-    a.Equal(tpTokenResp.Token, resp.Token)
     a.Equal(tpTokenResp.AppId, resp.AppId)
+    a.Equal(tpTokenResp.Token, resp.Token)
 }
 
 func TestWechatTpAuthToken(t *testing.T) {
@@ -94,7 +168,7 @@ func TestWechatTpAuthToken(t *testing.T) {
     a.NotNil(err)
     a.Equal("请求WechatTpAuthToken失败", err.Error())
 
-    tpAuthTokenResp := WechatTpAuthTokenResp{Token: "token", AppId: "appId", AuthorizerAppId: "authorizerAppId"}
+    tpAuthTokenResp := WechatTpAuthTokenResp{AppId: "appId", AuthorizerAppId: "authorizerAppId", Token: "token", Ticket: "ticket"}
     testServer = httptest.NewServer(http.HandlerFunc(
         func(w http.ResponseWriter, r *http.Request) {
             a.Equal("GET", r.Method)
@@ -106,13 +180,51 @@ func TestWechatTpAuthToken(t *testing.T) {
     ConfigInstance.Address = testServer.URL
     resp, err := WechatTpAuthToken("codeName", "authorizerAppId")
     a.Nil(err)
-    a.Equal(tpAuthTokenResp.Token, resp.Token)
     a.Equal(tpAuthTokenResp.AppId, resp.AppId)
     a.Equal(tpAuthTokenResp.AuthorizerAppId, resp.AuthorizerAppId)
+    a.Equal(tpAuthTokenResp.Token, resp.Token)
+    a.Equal(tpAuthTokenResp.Ticket, resp.Ticket)
 
     _, err = wechatTpAuthTokenCache.Value("codeName:authorizerAppId")
     a.NotNil(err)
     a.Equal("WechatTpAuthKey type error", err.Error())
+}
+
+func TestWechatTpAuthJsConfig(t *testing.T) {
+    a := assert.New(t)
+    ConfigInstance = NewConfig()
+
+    ConfigInstance.Address = ""
+    _, err := WechatTpAuthJsConfig("codeName", "http://varys.com/test")
+    a.NotNil(err)
+    a.Equal("未配置Varys.Address", err.Error())
+
+    testServer := httptest.NewServer(http.HandlerFunc(
+        func(w http.ResponseWriter, r *http.Request) {
+            w.WriteHeader(http.StatusInternalServerError)
+        }))
+    ConfigInstance.Address = testServer.URL
+    _, err = WechatTpAuthJsConfig("codeName", "http://varys.com/test")
+    a.NotNil(err)
+    a.Equal("请求WechatTpAuthJsConfig失败", err.Error())
+
+    jsConfigResp := WechatJsConfigResp{AppId: "appId", NonceStr: "nonceStr", Timestamp: 100, Signature: "signature"}
+    testServer = httptest.NewServer(http.HandlerFunc(
+        func(w http.ResponseWriter, r *http.Request) {
+            a.Equal("GET", r.Method)
+            a.Equal("/query-wechat-tp-auth-js-config/codeName", r.URL.EscapedPath())
+            a.Equal("http://varys.com/test", r.FormValue("url"))
+
+            w.WriteHeader(http.StatusOK)
+            _, _ = w.Write([]byte(gokits.Json(jsConfigResp)))
+        }))
+    ConfigInstance.Address = testServer.URL
+    resp, err := WechatTpAuthJsConfig("codeName", "http://varys.com/test")
+    a.Nil(err)
+    a.Equal(jsConfigResp.AppId, resp.AppId)
+    a.Equal(jsConfigResp.NonceStr, resp.NonceStr)
+    a.Equal(jsConfigResp.Timestamp, resp.Timestamp)
+    a.Equal(jsConfigResp.Signature, resp.Signature)
 }
 
 func TestWechatCorpToken(t *testing.T) {
@@ -133,7 +245,7 @@ func TestWechatCorpToken(t *testing.T) {
     a.NotNil(err)
     a.Equal("请求WechatCorpToken失败", err.Error())
 
-    corpTokenResp := WechatCorpTokenResp{Token: "token", CorpId: "corpId"}
+    corpTokenResp := WechatCorpTokenResp{CorpId: "corpId", Token: "token", }
     testServer = httptest.NewServer(http.HandlerFunc(
         func(w http.ResponseWriter, r *http.Request) {
             a.Equal("GET", r.Method)
@@ -145,8 +257,8 @@ func TestWechatCorpToken(t *testing.T) {
     ConfigInstance.Address = testServer.URL
     resp, err := WechatCorpToken("codeName")
     a.Nil(err)
-    a.Equal(corpTokenResp.Token, resp.Token)
     a.Equal(corpTokenResp.CorpId, resp.CorpId)
+    a.Equal(corpTokenResp.Token, resp.Token)
 }
 
 func TestWechatCorpTpAuthToken(t *testing.T) {
@@ -167,7 +279,7 @@ func TestWechatCorpTpAuthToken(t *testing.T) {
     a.NotNil(err)
     a.Equal("请求WechatCorpTpAuthToken失败", err.Error())
 
-    corpTpAuthTokenResp := WechatCorpTpAuthTokenResp{Token: "token", CorpId: "appId", SuiteId: "suiteId"}
+    corpTpAuthTokenResp := WechatCorpTpAuthTokenResp{CorpId: "appId", SuiteId: "suiteId", Token: "token"}
     testServer = httptest.NewServer(http.HandlerFunc(
         func(w http.ResponseWriter, r *http.Request) {
             a.Equal("GET", r.Method)
@@ -179,9 +291,9 @@ func TestWechatCorpTpAuthToken(t *testing.T) {
     ConfigInstance.Address = testServer.URL
     resp, err := WechatCorpTpAuthToken("codeName", "corpId")
     a.Nil(err)
-    a.Equal(corpTpAuthTokenResp.Token, resp.Token)
     a.Equal(corpTpAuthTokenResp.CorpId, resp.CorpId)
     a.Equal(corpTpAuthTokenResp.SuiteId, resp.SuiteId)
+    a.Equal(corpTpAuthTokenResp.Token, resp.Token)
 
     _, err = wechatCorpTpAuthTokenCache.Value("codeName:corpId")
     a.NotNil(err)
@@ -222,12 +334,12 @@ func TestToutiaoAppToken(t *testing.T) {
     a.Equal(appTokenResp.AppId, resp.AppId)
 }
 
-func TestWechatMpLogin(t *testing.T) {
+func TestFengniaoAppToken(t *testing.T) {
     a := assert.New(t)
     ConfigInstance = NewConfig()
 
     ConfigInstance.Address = ""
-    _, err := WechatMpLogin("codeName", "js_code")
+    _, err := FengniaoAppToken("codeName")
     a.NotNil(err)
     a.Equal("未配置Varys.Address", err.Error())
 
@@ -236,25 +348,22 @@ func TestWechatMpLogin(t *testing.T) {
             w.WriteHeader(http.StatusInternalServerError)
         }))
     ConfigInstance.Address = testServer.URL
-    _, err = WechatMpLogin("codeName", "js_code")
+    _, err = FengniaoAppToken("codeName")
     a.NotNil(err)
-    a.Equal("请求WechatMpLogin失败", err.Error())
+    a.Equal("请求FengniaoAppToken失败", err.Error())
 
-    mpLoginResp := WechatMpLoginResp{OpenId: "open_id", SessionKey: "session_key", UnionId: "unionid"}
+    appTokenResp := ToutiaoAppTokenResp{AppId: "appId", Token: "token"}
     testServer = httptest.NewServer(http.HandlerFunc(
         func(w http.ResponseWriter, r *http.Request) {
             a.Equal("GET", r.Method)
-            a.Equal("/proxy-wechat-mp-login/codeName", r.URL.EscapedPath())
-            a.Equal("js_code", r.FormValue("js_code"))
+            a.Equal("/query-fengniao-app-token/codeName", r.URL.EscapedPath())
 
             w.WriteHeader(http.StatusOK)
-            _, _ = w.Write([]byte(gokits.Json(mpLoginResp)))
+            _, _ = w.Write([]byte(gokits.Json(appTokenResp)))
         }))
     ConfigInstance.Address = testServer.URL
-    resp, err := WechatMpLogin("codeName", "js_code")
+    resp, err := FengniaoAppToken("codeName")
     a.Nil(err)
-    a.Equal(mpLoginResp.OpenId, resp.OpenId)
-    a.Equal(mpLoginResp.SessionKey, resp.SessionKey)
-    a.Equal(mpLoginResp.UnionId, resp.UnionId)
-
+    a.Equal(appTokenResp.AppId, resp.AppId)
+    a.Equal(appTokenResp.Token, resp.Token)
 }

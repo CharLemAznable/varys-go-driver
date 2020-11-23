@@ -43,23 +43,33 @@ func (proxyReq *ProxyReq) Post() (string, error) {
     return proxyReq.httpReq.Post()
 }
 
-func WechatApp(codeName string, proxyPathTemplate string, proxyPathArgs ...interface{}) *ProxyReq {
+func WechatApp(codeName, proxyPathTemplate string, proxyPathArgs ...interface{}) *ProxyReq {
     return NewProxyReq(ConfigInstance.Path("/proxy-wechat-app/",
         codeName, proxyPath(proxyPathTemplate, proxyPathArgs...)))
 }
 
-func WechatMp(codeName string, proxyPathTemplate string, proxyPathArgs ...interface{}) *ProxyReq {
+func WechatMp(codeName, proxyPathTemplate string, proxyPathArgs ...interface{}) *ProxyReq {
     return NewProxyReq(ConfigInstance.Path("/proxy-wechat-mp/",
         codeName, proxyPath(proxyPathTemplate, proxyPathArgs...)))
 }
 
-func WechatTp(codeName string, proxyPathTemplate string, proxyPathArgs ...interface{}) *ProxyReq {
+func WechatTp(codeName, proxyPathTemplate string, proxyPathArgs ...interface{}) *ProxyReq {
     return NewProxyReq(ConfigInstance.Path("/proxy-wechat-tp/",
         codeName, proxyPath(proxyPathTemplate, proxyPathArgs...)))
 }
 
-func WechatCorp(codeName string, proxyPathTemplate string, proxyPathArgs ...interface{}) *ProxyReq {
+func WechatTpAuth(codeName, authorizerAppId, proxyPathTemplate string, proxyPathArgs ...interface{}) *ProxyReq {
+    return NewProxyReq(ConfigInstance.Path("/proxy-wechat-tp-auth/",
+        codeName, authorizerAppId, proxyPath(proxyPathTemplate, proxyPathArgs...)))
+}
+
+func WechatCorp(codeName, proxyPathTemplate string, proxyPathArgs ...interface{}) *ProxyReq {
     return NewProxyReq(ConfigInstance.Path("/proxy-wechat-corp/",
+        codeName, proxyPath(proxyPathTemplate, proxyPathArgs...)))
+}
+
+func FengniaoApp(codeName, proxyPathTemplate string, proxyPathArgs ...interface{}) *ProxyReq {
+    return NewProxyReq(ConfigInstance.Path("/proxy-fengniao-app/",
         codeName, proxyPath(proxyPathTemplate, proxyPathArgs...)))
 }
 

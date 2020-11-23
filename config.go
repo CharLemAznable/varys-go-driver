@@ -1,6 +1,7 @@
 package varys
 
 import (
+    "errors"
     "github.com/CharLemAznable/gokits"
     "strings"
     "time"
@@ -14,6 +15,7 @@ type Config struct {
     WechatCorpTokenCacheDuration       time.Duration
     WechatCorpTpAuthTokenCacheDuration time.Duration
     ToutiaoAppTokenCacheDuration       time.Duration
+    FengniaoAppTokenCacheDuration      time.Duration
 }
 
 type ConfigOptions struct {
@@ -24,6 +26,7 @@ type ConfigOptions struct {
     WechatCorpTokenCacheDuration       time.Duration
     WechatCorpTpAuthTokenCacheDuration time.Duration
     ToutiaoAppTokenCacheDuration       time.Duration
+    FengniaoAppTokenCacheDuration      time.Duration
 }
 
 var defaultConfigOptions = ConfigOptions{
@@ -34,6 +37,7 @@ var defaultConfigOptions = ConfigOptions{
     WechatCorpTokenCacheDuration:       time.Minute * 10,
     WechatCorpTpAuthTokenCacheDuration: time.Minute * 10,
     ToutiaoAppTokenCacheDuration:       time.Minute * 10,
+    FengniaoAppTokenCacheDuration:      time.Minute * 10,
 }
 
 type ConfigOption func(*ConfigOptions)
@@ -66,6 +70,10 @@ func WithToutiaoAppTokenCacheDuration(toutiaoAppTokenCacheDuration time.Duration
     return func(o *ConfigOptions) { o.ToutiaoAppTokenCacheDuration = toutiaoAppTokenCacheDuration }
 }
 
+func WithFengniaoAppTokenCacheDuration(fengniaoAppTokenCacheDuration time.Duration) ConfigOption {
+    return func(o *ConfigOptions) { o.FengniaoAppTokenCacheDuration = fengniaoAppTokenCacheDuration }
+}
+
 func NewConfig(opts ...ConfigOption) *Config {
     options := defaultConfigOptions
     for _, o := range opts {
@@ -79,6 +87,7 @@ func NewConfig(opts ...ConfigOption) *Config {
         WechatCorpTokenCacheDuration:       options.WechatCorpTokenCacheDuration,
         WechatCorpTpAuthTokenCacheDuration: options.WechatCorpTpAuthTokenCacheDuration,
         ToutiaoAppTokenCacheDuration:       options.ToutiaoAppTokenCacheDuration,
+        FengniaoAppTokenCacheDuration:      options.FengniaoAppTokenCacheDuration,
     }
 }
 
@@ -95,4 +104,11 @@ func (config *Config) Path(pathComponents ...string) string {
     }
 
     return config.Address + subpath
+}
+
+func httpGet(subpath string) (string, error) {
+    if 0 == len(ConfigInstance.Address) {
+        return "", errors.New("未配置Varys.Address")
+    }
+    return gokits.NewHttpReq(ConfigInstance.Path(subpath)).Get()
 }

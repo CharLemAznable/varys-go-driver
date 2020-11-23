@@ -17,6 +17,7 @@ func TestConfigInstance(t *testing.T) {
     a.Equal(time.Minute*10, ConfigInstance.WechatCorpTokenCacheDuration)
     a.Equal(time.Minute*10, ConfigInstance.WechatCorpTpAuthTokenCacheDuration)
     a.Equal(time.Minute*10, ConfigInstance.ToutiaoAppTokenCacheDuration)
+    a.Equal(time.Minute*10, ConfigInstance.FengniaoAppTokenCacheDuration)
 
     ConfigInstance = NewConfig(
         WithAddress("1"),
@@ -26,6 +27,7 @@ func TestConfigInstance(t *testing.T) {
         WithWechatCorpTokenCacheDuration(time.Minute*5),
         WithWechatCorpTpAuthTokenCacheDuration(time.Minute*5),
         WithToutiaoAppTokenCacheDuration(time.Minute*5),
+        WithFengniaoAppTokenCacheDuration(time.Minute*5),
     )
     a.Equal("1", ConfigInstance.Address)
     a.Equal(time.Minute*5, ConfigInstance.WechatAppTokenCacheDuration)
@@ -34,6 +36,7 @@ func TestConfigInstance(t *testing.T) {
     a.Equal(time.Minute*5, ConfigInstance.WechatCorpTokenCacheDuration)
     a.Equal(time.Minute*5, ConfigInstance.WechatCorpTpAuthTokenCacheDuration)
     a.Equal(time.Minute*5, ConfigInstance.ToutiaoAppTokenCacheDuration)
+    a.Equal(time.Minute*5, ConfigInstance.FengniaoAppTokenCacheDuration)
 }
 
 func TestConfigPath(t *testing.T) {

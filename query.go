@@ -62,6 +62,7 @@ type ToutiaoAppTokenResp struct {
 }
 
 type FengniaoAppTokenResp struct {
+    Error string `json:"error"`
     AppId string `json:"appId"`
     Token string `json:"token"`
 }

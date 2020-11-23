@@ -13,7 +13,7 @@ type WechatAppTokenResp struct {
     Ticket string `json:"ticket"`
 }
 
-type WechatMpLoginResp struct {
+type WechatAppMpLoginResp struct {
     OpenId     string `json:"openid"`
     SessionKey string `json:"session_key"`
     UnionId    string `json:"unionid"`
@@ -33,6 +33,13 @@ type WechatTpAuthTokenResp struct {
     AuthorizerAppId string `json:"authorizerAppId"`
     Token           string `json:"token"`
     Ticket          string `json:"ticket"`
+}
+
+type WechatTpAuthMpLoginResp struct {
+    OpenId     string `json:"openid"`
+    SessionKey string `json:"session_key"`
+    Errcode    int    `json:"errcode"`
+    Errmsg     string `json:"errmsg"`
 }
 
 type WechatCorpTokenResp struct {
@@ -75,19 +82,21 @@ func WechatAppToken(codeName string) (*WechatAppTokenResp, error) {
     return value.Data().(*WechatAppTokenResp), nil
 }
 
-func WechatMpLogin(codeName, jsCode string) (*WechatMpLoginResp, error) {
-    resp, err := httpGet(gokits.PathJoin("/proxy-wechat-mp-login/", codeName) + "?js_code=" + urlEncoder.QueryEscape(jsCode))
+func WechatAppMpLogin(codeName, jsCode string) (*WechatAppMpLoginResp, error) {
+    resp, err := httpGet(gokits.PathJoin("/proxy-wechat-app-mp-login/",
+        codeName) + "?js_code=" + urlEncoder.QueryEscape(jsCode))
     if nil != err {
         return nil, err
     }
     if 0 == len(resp) {
-        return nil, errors.New("请求WechatMpLogin失败")
+        return nil, errors.New("请求WechatAppMpLogin失败")
     }
-    return gokits.UnJson(resp, new(WechatMpLoginResp)).(*WechatMpLoginResp), nil
+    return gokits.UnJson(resp, new(WechatAppMpLoginResp)).(*WechatAppMpLoginResp), nil
 }
 
 func WechatAppJsConfig(codeName, url string) (*WechatJsConfigResp, error) {
-    resp, err := httpGet(gokits.PathJoin("/query-wechat-app-js-config/", codeName) + "?url=" + urlEncoder.QueryEscape(url))
+    resp, err := httpGet(gokits.PathJoin("/query-wechat-app-js-config/",
+        codeName) + "?url=" + urlEncoder.QueryEscape(url))
     if nil != err {
         return nil, err
     }
@@ -114,8 +123,21 @@ func WechatTpAuthToken(codeName, authorizerAppId string) (*WechatTpAuthTokenResp
     return value.Data().(*WechatTpAuthTokenResp), nil
 }
 
-func WechatTpAuthJsConfig(codeName, url string) (*WechatJsConfigResp, error) {
-    resp, err := httpGet(gokits.PathJoin("/query-wechat-tp-auth-js-config/", codeName) + "?url=" + urlEncoder.QueryEscape(url))
+func WechatTpAuthMpLogin(codeName, authorizerAppId, jsCode string) (*WechatTpAuthMpLoginResp, error) {
+    resp, err := httpGet(gokits.PathJoin("/proxy-wechat-tp-auth-mp-login/",
+        codeName, authorizerAppId) + "?js_code=" + urlEncoder.QueryEscape(jsCode))
+    if nil != err {
+        return nil, err
+    }
+    if 0 == len(resp) {
+        return nil, errors.New("请求WechatTpAuthMpLogin失败")
+    }
+    return gokits.UnJson(resp, new(WechatTpAuthMpLoginResp)).(*WechatTpAuthMpLoginResp), nil
+}
+
+func WechatTpAuthJsConfig(codeName, authorizerAppId, url string) (*WechatJsConfigResp, error) {
+    resp, err := httpGet(gokits.PathJoin("/query-wechat-tp-auth-js-config/",
+        codeName, authorizerAppId) + "?url=" + urlEncoder.QueryEscape(url))
     if nil != err {
         return nil, err
     }

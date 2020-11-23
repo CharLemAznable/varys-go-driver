@@ -42,40 +42,6 @@ func TestWechatApp(t *testing.T) {
     a.Equal("defaultWechatAppParamResp", resp)
 }
 
-func TestWechatMp(t *testing.T) {
-    a := assert.New(t)
-    ConfigInstance = NewConfig()
-
-    testServer := httptest.NewServer(http.HandlerFunc(
-        func(w http.ResponseWriter, r *http.Request) {
-            a.Equal("GET", r.Method)
-            a.Equal("/proxy-wechat-mp/codeName/wechatMp", r.URL.EscapedPath())
-            a.Equal("b", r.Header.Get("a"))
-
-            w.WriteHeader(http.StatusOK)
-            _, _ = w.Write([]byte("defaultWechatMpResp"))
-        }))
-    ConfigInstance.Address = testServer.URL
-    resp, err := WechatMp("codeName", "/wechatMp").Prop("a", "b").Get()
-    a.Nil(err)
-    a.Equal("defaultWechatMpResp", resp)
-
-    testServer = httptest.NewServer(http.HandlerFunc(
-        func(w http.ResponseWriter, r *http.Request) {
-            a.Equal("POST", r.Method)
-            a.Equal("/proxy-wechat-mp/codeName/wechatMpParam/testParam", r.URL.EscapedPath())
-            bytes, _ := ioutil.ReadAll(r.Body)
-            a.Equal("requestBody", string(bytes))
-
-            w.WriteHeader(http.StatusOK)
-            _, _ = w.Write([]byte("defaultWechatMpParamResp"))
-        }))
-    ConfigInstance.Address = testServer.URL
-    resp, err = WechatMp("codeName", "wechatMpParam/%s", "testParam").RequestBody("requestBody").Post()
-    a.Nil(err)
-    a.Equal("defaultWechatMpParamResp", resp)
-}
-
 func TestWechatTp(t *testing.T) {
     a := assert.New(t)
     ConfigInstance = NewConfig()

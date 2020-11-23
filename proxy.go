@@ -48,11 +48,6 @@ func WechatApp(codeName, proxyPathTemplate string, proxyPathArgs ...interface{})
         codeName, proxyPath(proxyPathTemplate, proxyPathArgs...)))
 }
 
-func WechatMp(codeName, proxyPathTemplate string, proxyPathArgs ...interface{}) *ProxyReq {
-    return NewProxyReq(ConfigInstance.Path("/proxy-wechat-mp/",
-        codeName, proxyPath(proxyPathTemplate, proxyPathArgs...)))
-}
-
 func WechatTp(codeName, proxyPathTemplate string, proxyPathArgs ...interface{}) *ProxyReq {
     return NewProxyReq(ConfigInstance.Path("/proxy-wechat-tp/",
         codeName, proxyPath(proxyPathTemplate, proxyPathArgs...)))
